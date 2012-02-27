@@ -4,8 +4,6 @@
 # URL: github.com/phrawzty/check_http_json
 # Description: Nagios plugin that makes an HTTP connection and looks for some JSON or summat.
 
-
-
 # Requires.
 require 'rubygems'
 require 'json'
@@ -14,12 +12,8 @@ require 'uri'
 require 'optparse'
 require 'timeout'
 
-
-
 # Herp derp.
 options = {}
-
-
 
 # Def jam.
 
@@ -39,16 +33,30 @@ def do_exit (v, code)
     end
 end
 
-# As the results may be nested hashes; flatten that out into something manageable.
+def val_flatten(val, newkey = nil, flat = {})
+     if val.is_a? Hash then
+         hash_flatten val, newkey, flat
+     else
+         flat[newkey] = val
+     end
+end
+
+# As the results may be arrays or nested hashes; flatten that out into something manageable.
 def hash_flatten(hash, prefix = nil, flat = {})
-    hash.keys.each do |key|
-        newkey = key
-        newkey = '%s.%s' % [prefix, key] if prefix
-        val = hash[key]
-        if val.is_a? Hash then
-            hash_flatten val, newkey, flat
-        else
-            flat[newkey] = val
+    if hash.is_a? Array 
+        hash.each_index do |index|
+           newkey = index
+           newkey = nil if hash.length == 1
+           newkey = prefix if prefix
+           val = hash[index]
+           val_flatten val, newkey, flat
+        end
+    else
+        hash.keys.each do |key|
+            newkey = key
+            newkey = '%s.%s' % [prefix, key] if prefix
+            val = hash[key]
+            val_flatten val, newkey, flat 
         end
     end
     return flat
