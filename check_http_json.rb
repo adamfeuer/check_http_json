@@ -34,7 +34,7 @@ def do_exit (v, code)
 end
 
 def val_flatten(val, newkey = nil, flat = {})
-     if val.is_a? Hash then
+     if val.is_a? Hash or val.is_a? Array then
          hash_flatten val, newkey, flat
      else
          flat[newkey] = val
